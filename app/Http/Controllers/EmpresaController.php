@@ -8,58 +8,85 @@ use Illuminate\Http\Request;
 class EmpresaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Mostrar todas las empresas.
      */
     public function index()
     {
-        //
+        $empresas = Empresa::with('direcciones')->get();
+        return response()->json($empresas);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Almacenar una nueva empresa.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $empresa = Empresa::create([
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Empresa creada exitosamente',
+            'empresa' => $empresa,
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar una empresa específica.
      */
-    public function show(Empresa $empresa)
+    public function show($id)
     {
-        //
+        $empresa = Empresa::with('direcciones')->find($id);
+
+        if (!$empresa) {
+            return response()->json(['message' => 'Empresa no encontrada'], 404);
+        }
+
+        return response()->json($empresa);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Actualizar una empresa específica.
      */
-    public function edit(Empresa $empresa)
+    public function update(Request $request, $id)
     {
-        //
+        $empresa = Empresa::find($id);
+
+        if (!$empresa) {
+            return response()->json(['message' => 'Empresa no encontrada'], 404);
+        }
+
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $empresa->update([
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Empresa actualizada correctamente',
+            'empresa' => $empresa,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Eliminar una empresa específica.
      */
-    public function update(Request $request, Empresa $empresa)
+    public function destroy($id)
     {
-        //
-    }
+        $empresa = Empresa::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Empresa $empresa)
-    {
-        //
+        if (!$empresa) {
+            return response()->json(['message' => 'Empresa no encontrada'], 404);
+        }
+
+        $empresa->delete();
+
+        return response()->json(['message' => 'Empresa eliminada correctamente']);
     }
 }

@@ -8,58 +8,101 @@ use Illuminate\Http\Request;
 class DocumentoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todos los documentos con carpeta y tipo de archivo.
      */
     public function index()
     {
-        //
+        $documentos = Documento::with(['carpeta', 'tipoArchivo'])->get();
+        return response()->json($documentos);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Crear un documento.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'carpeta_id' => 'required|exists:carpetas,id',
+            'tipo_archivo_id' => 'required|exists:tipos_archivos,id',
+            'nombre' => 'required|string|max:255',
+            'archivo' => 'required|string|max:255',
+            'fecha_creacion' => 'required|date',
+        ]);
+
+        $documento = Documento::create([
+            'carpeta_id' => $request->carpeta_id,
+            'tipo_archivo_id' => $request->tipo_archivo_id,
+            'nombre' => $request->nombre,
+            'archivo' => $request->archivo,
+            'fecha_creacion' => $request->fecha_creacion,
+        ]);
+
+        return response()->json([
+            'message' => 'Documento creado exitosamente',
+            'documento' => $documento,
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar un documento específico.
      */
-    public function show(Documento $documento)
+    public function show($id)
     {
-        //
+        $documento = Documento::with(['carpeta', 'tipoArchivo'])->find($id);
+
+        if (!$documento) {
+            return response()->json(['message' => 'Documento no encontrado'], 404);
+        }
+
+        return response()->json($documento);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Actualizar un documento.
      */
-    public function edit(Documento $documento)
+    public function update(Request $request, $id)
     {
-        //
+        $documento = Documento::find($id);
+
+        if (!$documento) {
+            return response()->json(['message' => 'Documento no encontrado'], 404);
+        }
+
+        $request->validate([
+            'carpeta_id' => 'required|exists:carpetas,id',
+            'tipo_archivo_id' => 'required|exists:tipos_archivos,id',
+            'nombre' => 'required|string|max:255',
+            'archivo' => 'required|string|max:255',
+            'fecha_creacion' => 'required|date',
+        ]);
+
+        $documento->update([
+            'carpeta_id' => $request->carpeta_id,
+            'tipo_archivo_id' => $request->tipo_archivo_id,
+            'nombre' => $request->nombre,
+            'archivo' => $request->archivo,
+            'fecha_creacion' => $request->fecha_creacion,
+        ]);
+
+        return response()->json([
+            'message' => 'Documento actualizado correctamente',
+            'documento' => $documento,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Eliminar un documento.
      */
-    public function update(Request $request, Documento $documento)
+    public function destroy($id)
     {
-        //
-    }
+        $documento = Documento::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Documento $documento)
-    {
-        //
+        if (!$documento) {
+            return response()->json(['message' => 'Documento no encontrado'], 404);
+        }
+
+        $documento->delete();
+
+        return response()->json(['message' => 'Documento eliminado correctamente']);
     }
 }

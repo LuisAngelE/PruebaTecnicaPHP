@@ -9,6 +9,12 @@ class Empresa extends Model
 {
     use HasFactory;
 
+    protected $table = 'empresas';
+
+    protected $fillable = [
+        'nombre',
+    ];
+
     // Una empresa puede tener muchas direcciones
     public function direcciones()
     {

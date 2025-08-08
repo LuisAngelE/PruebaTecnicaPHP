@@ -9,6 +9,12 @@ class TipoArchivo extends Model
 {
     use HasFactory;
 
+    protected $table = 'tipos_archivos';
+
+    protected $fillable = [
+        'nombre',
+    ];
+
     // Un tipo de archivo puede tener muchos documentos
     public function documentos()
     {

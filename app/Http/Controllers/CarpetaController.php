@@ -8,58 +8,93 @@ use Illuminate\Http\Request;
 class CarpetaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todas las carpetas con área, carpeta padre, subcarpetas y documentos.
      */
     public function index()
     {
-        //
+        $carpetas = Carpeta::with(['area', 'padre', 'subcarpetas', 'documentos'])->get();
+        return response()->json($carpetas);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Crear una carpeta.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'area_id' => 'required|exists:areas,id',
+            'padre_id' => 'nullable|exists:carpetas,id',
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $carpeta = Carpeta::create([
+            'area_id' => $request->area_id,
+            'padre_id' => $request->padre_id,
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Carpeta creada exitosamente',
+            'carpeta' => $carpeta,
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar una carpeta específica.
      */
-    public function show(Carpeta $carpeta)
+    public function show($id)
     {
-        //
+        $carpeta = Carpeta::with(['area', 'padre', 'subcarpetas', 'documentos'])->find($id);
+
+        if (!$carpeta) {
+            return response()->json(['message' => 'Carpeta no encontrada'], 404);
+        }
+
+        return response()->json($carpeta);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Actualizar una carpeta.
      */
-    public function edit(Carpeta $carpeta)
+    public function update(Request $request, $id)
     {
-        //
+        $carpeta = Carpeta::find($id);
+
+        if (!$carpeta) {
+            return response()->json(['message' => 'Carpeta no encontrada'], 404);
+        }
+
+        $request->validate([
+            'area_id' => 'required|exists:areas,id',
+            'padre_id' => 'nullable|exists:carpetas,id',
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $carpeta->update([
+            'area_id' => $request->area_id,
+            'padre_id' => $request->padre_id,
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Carpeta actualizada correctamente',
+            'carpeta' => $carpeta,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Eliminar una carpeta.
      */
-    public function update(Request $request, Carpeta $carpeta)
+    public function destroy($id)
     {
-        //
-    }
+        $carpeta = Carpeta::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Carpeta $carpeta)
-    {
-        //
+        if (!$carpeta) {
+            return response()->json(['message' => 'Carpeta no encontrada'], 404);
+        }
+
+        $carpeta->delete();
+
+        return response()->json(['message' => 'Carpeta eliminada correctamente']);
     }
 }

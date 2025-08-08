@@ -8,58 +8,89 @@ use Illuminate\Http\Request;
 class AreaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Mostrar todas las áreas con sus direcciones y carpetas.
      */
     public function index()
     {
-        //
+        $areas = Area::with(['direccion', 'carpetas'])->get();
+        return response()->json($areas);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Almacenar una nueva área.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'direccion_id' => 'required|exists:direcciones,id',
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $area = Area::create([
+            'direccion_id' => $request->direccion_id,
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Área creada exitosamente',
+            'area' => $area,
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar una área específica.
      */
-    public function show(Area $area)
+    public function show($id)
     {
-        //
+        $area = Area::with(['direccion', 'carpetas'])->find($id);
+
+        if (!$area) {
+            return response()->json(['message' => 'Área no encontrada'], 404);
+        }
+
+        return response()->json($area);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Actualizar un área específica.
      */
-    public function edit(Area $area)
+    public function update(Request $request, $id)
     {
-        //
+        $area = Area::find($id);
+
+        if (!$area) {
+            return response()->json(['message' => 'Área no encontrada'], 404);
+        }
+
+        $request->validate([
+            'direccion_id' => 'required|exists:direcciones,id',
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $area->update([
+            'direccion_id' => $request->direccion_id,
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Área actualizada correctamente',
+            'area' => $area,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Eliminar un área específica.
      */
-    public function update(Request $request, Area $area)
+    public function destroy($id)
     {
-        //
-    }
+        $area = Area::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Area $area)
-    {
-        //
+        if (!$area) {
+            return response()->json(['message' => 'Área no encontrada'], 404);
+        }
+
+        $area->delete();
+
+        return response()->json(['message' => 'Área eliminada correctamente']);
     }
 }

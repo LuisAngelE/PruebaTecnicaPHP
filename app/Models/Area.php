@@ -9,6 +9,13 @@ class Area extends Model
 {
     use HasFactory;
 
+    protected $table = 'areas';
+
+    protected $fillable = [
+        'direccion_id',
+        'nombre',
+    ];
+
     // Un área pertenece a una dirección
     public function direccion()
     {

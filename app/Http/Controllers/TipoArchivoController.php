@@ -8,58 +8,85 @@ use Illuminate\Http\Request;
 class TipoArchivoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todos los tipos de archivo con sus documentos.
      */
     public function index()
     {
-        //
+        $tipos = TipoArchivo::with('documentos')->get();
+        return response()->json($tipos);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Crear un tipo de archivo.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $tipoArchivo = TipoArchivo::create([
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Tipo de archivo creado exitosamente',
+            'tipo_archivo' => $tipoArchivo,
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar un tipo de archivo específico.
      */
-    public function show(TipoArchivo $tipoArchivo)
+    public function show($id)
     {
-        //
+        $tipoArchivo = TipoArchivo::with('documentos')->find($id);
+
+        if (!$tipoArchivo) {
+            return response()->json(['message' => 'Tipo de archivo no encontrado'], 404);
+        }
+
+        return response()->json($tipoArchivo);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Actualizar un tipo de archivo.
      */
-    public function edit(TipoArchivo $tipoArchivo)
+    public function update(Request $request, $id)
     {
-        //
+        $tipoArchivo = TipoArchivo::find($id);
+
+        if (!$tipoArchivo) {
+            return response()->json(['message' => 'Tipo de archivo no encontrado'], 404);
+        }
+
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $tipoArchivo->update([
+            'nombre' => $request->nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Tipo de archivo actualizado correctamente',
+            'tipo_archivo' => $tipoArchivo,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Eliminar un tipo de archivo.
      */
-    public function update(Request $request, TipoArchivo $tipoArchivo)
+    public function destroy($id)
     {
-        //
-    }
+        $tipoArchivo = TipoArchivo::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TipoArchivo $tipoArchivo)
-    {
-        //
+        if (!$tipoArchivo) {
+            return response()->json(['message' => 'Tipo de archivo no encontrado'], 404);
+        }
+
+        $tipoArchivo->delete();
+
+        return response()->json(['message' => 'Tipo de archivo eliminado correctamente']);
     }
 }

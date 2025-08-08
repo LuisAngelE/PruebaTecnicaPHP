@@ -9,6 +9,14 @@ class Carpeta extends Model
 {
     use HasFactory;
 
+    protected $table = 'carpetas';
+
+    protected $fillable = [
+        'area_id',
+        'padre_id',
+        'nombre',
+    ];
+
     // Una carpeta pertenece a un área
     public function area()
     {

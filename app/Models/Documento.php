@@ -9,6 +9,16 @@ class Documento extends Model
 {
     use HasFactory;
 
+    protected $table = 'documentos';
+
+    protected $fillable = [
+        'carpeta_id',
+        'tipo_archivo_id',
+        'nombre',
+        'archivo',
+        'fecha_creacion',
+    ];
+
     // Un documento pertenece a una carpeta
     public function carpeta()
     {
