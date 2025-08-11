@@ -13,5 +13,6 @@ Route::apiResource('direcciones', DireccionController::class);
 Route::apiResource('areas', AreaController::class);
 Route::apiResource('carpetas', CarpetaController::class);
 Route::apiResource('documentos', DocumentoController::class);
+Route::post('editdocumentos/{id}', [DocumentoController::class, 'updateConArchivo']);
 Route::apiResource('tipos-archivos', TipoArchivoController::class);
 

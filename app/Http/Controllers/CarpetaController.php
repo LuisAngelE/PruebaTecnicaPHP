@@ -10,16 +10,23 @@ class CarpetaController extends Controller
     /**
      * Listar todas las carpetas con área, carpeta padre, subcarpetas y documentos.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $carpetas = Carpeta::with(['area', 'padre', 'subcarpetas', 'documentos'])->get();
-        return response()->json($carpetas);
+        $query = Carpeta::with(['area', 'padre', 'subcarpetas', 'documentos']);
+        if ($request->has('padre_id')) {
+            $query->where('padre_id', $request->padre_id);
+        }
+        if ($request->has('area_id')) {
+            $query->where('area_id', $request->area_id);
+        }
+        return response()->json($query->get());
     }
+
 
     /**
      * Crear una carpeta.
      */
-    public function store(Request $request)
+    public function store(Request $request, $id = null)
     {
         $request->validate([
             'area_id' => 'required|exists:areas,id',
@@ -32,6 +39,10 @@ class CarpetaController extends Controller
             'padre_id' => $request->padre_id,
             'nombre' => $request->nombre,
         ]);
+
+        if ($request->padre_id && $request->padre_id == $id) {
+            return response()->json(['message' => 'Una carpeta no puede ser su propio padre'], 400);
+        }
 
         return response()->json([
             'message' => 'Carpeta creada exitosamente',
@@ -76,6 +87,10 @@ class CarpetaController extends Controller
             'nombre' => $request->nombre,
         ]);
 
+        if ($request->padre_id && $request->padre_id == $id) {
+            return response()->json(['message' => 'Una carpeta no puede ser su propio padre'], 400);
+        }
+
         return response()->json([
             'message' => 'Carpeta actualizada correctamente',
             'carpeta' => $carpeta,
@@ -89,9 +104,12 @@ class CarpetaController extends Controller
     {
         $carpeta = Carpeta::find($id);
 
-        if (!$carpeta) {
-            return response()->json(['message' => 'Carpeta no encontrada'], 404);
+        if ($carpeta->documentos()->exists() || $carpeta->subcarpetas()->exists()) {
+            return response()->json([
+                'message' => 'No se puede eliminar la carpeta porque contiene documentos o subcarpetas'
+            ], 400);
         }
+
 
         $carpeta->delete();
 

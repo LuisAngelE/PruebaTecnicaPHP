@@ -30,7 +30,7 @@ class Carpeta extends Model
     }
 
     // Una carpeta puede pertenecer a una carpeta padre
-    public function carpetaPadre()
+    public function padre()
     {
         return $this->belongsTo(Carpeta::class, 'padre_id');
     }
